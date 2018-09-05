@@ -2,10 +2,11 @@
   <div class="list">
     <header>
     	<div class="s_input">
-    		<img class="ngv" src="../assets/ngv.png" />
-    		<img class="search" src="../assets/search.png" />
-    		<img class="cha" @click="clearKeyWord()" src="../assets/x.png" />
-    		<input  type="search"  v-model="keywords" @keyup.enter="searchInput" id="myInput" />
+	    		<img class="ngv" src="../assets/ngv.png" />
+	    		<img class="search" src="../assets/search.png" />
+	    		<img class="cha" @click="clearKeyWord()" src="../assets/x.png" />
+	    		<div class="ss" @click="searchInput">搜索</div>
+	    		<input  type="search"  v-model="keywords" @keyup.enter="searchInput" id="myInput" />
     	</div>
     	<div class="nav">
     		<ul>
@@ -20,12 +21,15 @@
     				<img class="top" src="../assets/top_a.png" v-else-if="sortXl == 'asc'">
     				<img class="top" src="../assets/top.png" v-else>
     			</li>
-    			<li @click="clickSx">筛选<img class="shai" src="../assets/shai.png"></li>
+    			<li @click="clickSx" v-if="!showSx">筛选<img class="shai" src="../assets/shai.png"></li>
+    			<li @click="clickSx" class="active" v-else>筛选<img class="shai" src="../assets/shai_a.png"></li>
     		</ul>
     	</div>
-    	
     </header>
-    <div class="content">
+    <div class="coupon_select" v-if="hasCoupon">
+			<span @click="deleteCoupon">只看有券<em>X</em></span>
+		</div>
+    <div :class="hasCoupon ? 'content content2' : 'content'">
     	<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="10">
     	<ul>
     		<li v-for="item in optional">
@@ -62,7 +66,15 @@
     	</div>
     </div>
     <p v-show="isLoadding" class="loadding">加载中...</p>
-    	<p v-show="loaddingEnd" class="loadding">没有更多数据</p>
+    <p v-show="loaddingEnd" class="loadding">没有更多数据</p>
+    <div class="zhe" v-show="showSx"></div>
+		<div class="screen" v-show="showSx">
+			<div class="screen_item" @click="clickCoupon">
+				<p class="zi fl coupon" v-if="hasCoupon">只看有券</p>
+				<p class="zi fl" v-else>只看有券</p>
+				<p class="mark fr" v-show="hasCoupon">√</p>
+			</div>
+		</div>
   </div>
   
 </template>
@@ -87,7 +99,9 @@ export default {
       sortXl:'',
       sortSx:'',
       disableClick:false,
-      sort:''
+      sort:'',
+      showSx:false,
+      hasCoupon:false
     }
   },
   created(){
@@ -113,7 +127,8 @@ export default {
 			 	params:{
 			 		"q":this.keywords,
 			 		"pageNo":this.pageNo,
-			 		"sort":this.sort
+			 		"sort":this.sort,
+			 		"hasCoupon":this.hasCoupon
 			 	}
 			 }).then(res=>{
 			 	if (res.data.optional == undefined || res.data.optional == null) {
@@ -191,7 +206,16 @@ export default {
   		this.search();
     },
     clickSx:function(){
-    	
+    	this.showSx = !this.showSx;
+    },
+    clickCoupon:function(){
+    	this.showSx = !this.showSx;
+    	this.hasCoupon = !this.hasCoupon;
+    	this.searchInput();
+    },
+    deleteCoupon:function(){
+    	this.hasCoupon = false;
+    	this.searchInput();
     }
   }
 }
@@ -203,35 +227,55 @@ export default {
 		background: #f2f2f2;
 		border-bottom: 1px solid #F2F2F2;
 		margin: 0 auto;
+		position: fixed;
+    top: 0;
+    margin: 0;
+    z-index: 999;
 	}
+
 	header .s_input{
 		width: 100%;
-		height: 132px;
+		height: 81px;
 		position: relative;
+		margin: 34px auto 22px auto;
 	}
 	header .ngv{
 		position: absolute;
-		top: 37%;
+		top: 25%;
 		left: 3.3%;
 		width: 40px;
 	}
 	header .search{
 		position: absolute;
-		top: 38%;
+		top: 25%;
 		left: 15.3%;
 		width: 38px;
 		height: 38px;
 	}
 	header .cha{
 		position: absolute;
-		top: 40%;
-		right: 8%;
+		top: 30%;
+		right: 176px;
 		width: 30px;
+	}
+	header .ss{
+		width: 126px;
+		height: 80px;
+		line-height: 80px;
+		background-color: #f14d38;
+		color: #fff;
+		font-size: 36px;
+		position: absolute;
+		top: 0;
+		right: 37px;
+		text-align: center;
+		border-top-right-radius: 40px;
+		border-bottom-right-radius: 40px;
 	}
 	header input{
 		width: 83%;
-		margin: 28px 0 28px 12.27%;
-		border: none;
+		margin-left:12.27%;
+		border: 2px solid #ec4c2c;
 		display: inline-block;
 		outline:none;
 		font-size: 30px;
@@ -274,19 +318,47 @@ export default {
 		width: 10px;
 		height: 16px;
 		position: absolute;
-		top: 18px;
+		top: 22px;
 		right: -10px;
 	}
 	header .nav ul li .shai{
 		width: 25px;
 		height: 21px;
 		position: absolute;
-		top: 15px;
+		top: 20px;
 		right: -20px;
+	}
+.coupon_select{
+		width: 100%;
+		height: 69px;
+		line-height: 69px;
+		border-bottom: 1px solid #ddd;
+		background: #fff;
+		position: fixed;
+		top: 193px;
+		left: 0;
+		z-index: 999;
+	}
+.coupon_select span {
+		margin-left: 30px;
+		font-size: 24px;
+		color: #333333;
+		background: #f2f2f2;
+		border-radius: 10px;
+		padding: 5px 20px;
+	}
+.coupon_select span em {
+		font-style: normal;
+		padding-left: 10px;
 	}
 	.content{
 		background-color: #fff;
+		margin-top: 193px;
 	}
+	.content2{
+		margin-top: 262px;
+	}
+
 	.content ul{
 		width: 714px;
 		margin: 0 auto;
@@ -412,6 +484,46 @@ export default {
 	line-height: 36px;
 	margin: 10px auto;
 }
+.zhe{
+		width: 100%;
+		height: 100%;
+		position: fixed;
+		background: #000000;
+		top: 0;
+		left: 0;
+		z-index: 998;
+		opacity: 0.3;
+	}
+.screen{
+		position: fixed;
+		top: 193px;
+		left: 0;
+		width: 100%;
+		height: 150px;
+		background: #fff;
+		z-index: 999;
+	}
+.screen	.screen_item{
+	width: 100%;
+	height: 80px;
+	line-height:80px;
+}
+.screen p{
+		width: 45%;
+		font-size: 28px;
+	}
+.screen .zi{
+		text-align: left;
+		padding-left: 30px;
+	}
+.screen .mark{
+		text-align: right;
+		padding-right: 12px;
+		color: #ff3413;
+	}
+.screen .coupon{
+		color: #ff3413;
+	}
 
 	
 </style>
