@@ -9,7 +9,7 @@ import VueRouter from 'vue-router'
 
 import List from './components/List'
 import Detail from './components/Detail'
-import DetailTwo from './components/DetailTwo'
+import Coupon from './components/Coupon'
 
 
 //import Users from './components/Users'
@@ -22,7 +22,7 @@ Vue.use(VueRouter)
 const routes = [
 	{path:"/",component:List,meta: {keepAlive: true }},
 	{path:"/detail",component:Detail,meta: {keepAlive: false }},
-	{path:"/detailTwo",component:DetailTwo,meta: {keepAlive: false }}
+	{path:"/coupon",component:Coupon,meta: {keepAlive: false }}
 ]
 
 const router = new VueRouter({
